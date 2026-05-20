@@ -97,73 +97,79 @@ const result = getLearnerData(CourseInfo, AssignmentGroup, LearnerSubmissions);
 /////////////////////////////////////////
 
 function getLearnerData(course, assignmentGroup, submissions) {
-  try{
-  if (course.id !== assignmentGroup.course_id) {
-    throw new Error(
-      "Invalid input: assignment group does not belong to this course",
-    );
-  }
-
-  const now = new Date();
-  const dueAssignments = assignmentGroup.assignments.filter((assignment) => {
-    return new Date(assignment.due_at) <= now;
-  });
-
-  const uniqueLearners = [];
-
-  submissions.forEach((submission) => {
-    if (!uniqueLearners.includes(submission.learner_id)){
-      uniqueLearners.push(submission.learner_id);
-    }
-  });
-
-  let results = [];
-  for (let learnerId of uniqueLearners) {
-    let totalEarned = 0;
-    let totalPossible = 0;
-    let finalResult = {
-      id: learnerId,
-      avg: 0,
-      assignments: {}
-    };
-
-    for(let assignment of dueAssignments){
-          const submission = submissions.find(
-      (s) => s.learner_id === learnerId && s.assignment_id === assignment.id,
-    );
-    if (!submission) continue;
-    if(assignment.points_possible === 0) continue;
-
-    const isLate = new Date(submission.submission.submitted_at) > new Date(assignment.due_at)
-    let score = submission.submission.score;
-    if(isLate){
-      score -= 0.1 * assignment.points_possible;
+  try {
+    if (course.id !== assignmentGroup.course_id) {
+      throw new Error(
+        "Invalid input: assignment group does not belong to this course",
+      );
     }
 
-    function calculatePercentage(score,points){
-      return score/points;
+    const now = new Date();
+    const dueAssignments = assignmentGroup.assignments.filter((assignment) => {
+      return new Date(assignment.due_at) <= now;
+    });
+
+    const uniqueLearners = [];
+
+    submissions.forEach((submission) => {
+      if (!uniqueLearners.includes(submission.learner_id)) {
+        uniqueLearners.push(submission.learner_id);
+      }
+    });
+
+    let results = [];
+    for (let learnerId of uniqueLearners) {
+      let totalEarned = 0;
+      let totalPossible = 0;
+      let finalResult = {
+        id: learnerId,
+        avg: 0,
+        assignments: {},
+      };
+
+      for (let assignment of dueAssignments) {
+        const submission = submissions.find(
+          (s) =>
+            s.learner_id === learnerId && s.assignment_id === assignment.id,
+        );
+        if (!submission) continue;
+        if (assignment.points_possible === 0) continue;
+
+        const isLate =
+          new Date(submission.submission.submitted_at) >
+          new Date(assignment.due_at);
+        let score = submission.submission.score;
+        if (isLate) {
+          score -= 0.1 * assignment.points_possible;
+        }
+
+        function calculatePercentage(score, points) {
+          return score / points;
+        }
+
+        const percentage = calculatePercentage(
+          score,
+          assignment.points_possible,
+        );
+        totalEarned += score;
+        totalPossible += assignment.points_possible;
+
+        finalResult.assignments[assignment.id] = percentage;
+      }
+
+      if (totalPossible === 0) {
+        finalResult.avg = 0;
+      } else {
+        finalResult.avg = totalEarned / totalPossible;
+      }
+
+      results.push(finalResult);
     }
 
-    const percentage = calculatePercentage(score, assignment.points_possible);
-    totalEarned += score
-    totalPossible += assignment.points_possible
-
-    finalResult.assignments[assignment.id] = percentage;
-    }
-
-    if(totalPossible === 0){
-      finalResult.avg = 0;
-    } else {
-      finalResult.avg = (totalEarned / totalPossible);
-    }
-  
-    results.push(finalResult);
-  }
-
-  console.log(results);
-  return results;
-  } catch (error){
-    console.log("Error processing:")
+    console.log(results);
+    return results;
+  } catch (error) {
+    console.log("Error processing:");
     return [];
   }
 }
