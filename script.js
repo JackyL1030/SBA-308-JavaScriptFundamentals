@@ -112,17 +112,20 @@ function getLearnerData(course, assignmentGroup, submissions) {
 
   const uniqueLearners = [];
 
-  for (submission of submissions) {
+  for (let submission of submissions) {
     if (!uniqueLearners.includes(submission.learner_id)) {
       uniqueLearners.push(submission.learner_id);
     }
   }
 
   let results = [];
-  for (learnerId of uniqueLearners) {
+  for (let learnerId of uniqueLearners) {
+    let totalEarned = 0;
+    let totalPossible = 0;
     let finalResult = {
       id: learnerId,
       avg: 0,
+      assignments: {}
     };
 
     for(let assignment of dueAssignments){
@@ -132,10 +135,21 @@ function getLearnerData(course, assignmentGroup, submissions) {
     if (!submission) continue;
 
     if(assignment.points_possible === 0) continue;
+
     const percentage = submission.submission.score / assignment.points_possible
+    totalEarned += submission.submission.score
+    totalPossible += assignment.points_possible
+
+    finalResult.assignments[assignment.id] = percentage;
     }
 
-
+    if(totalPossible === 0){
+      finalResult.avg = 0;
+    } else {
+      finalResult.avg = totalEarned / totalPossible
+    }
+  
+    
     results.push(finalResult);
   }
 
