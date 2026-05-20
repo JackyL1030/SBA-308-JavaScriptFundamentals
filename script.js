@@ -104,7 +104,6 @@ function getLearnerData(course, assignmentGroup, submissions) {
     );
   }
 
-  //Filtering out assignments not due yet
   const now = new Date();
   const dueAssignments = assignmentGroup.assignments.filter((assignment) => {
     return new Date(assignment.due_at) <= now;
@@ -133,11 +132,16 @@ function getLearnerData(course, assignmentGroup, submissions) {
       (s) => s.learner_id === learnerId && s.assignment_id === assignment.id,
     );
     if (!submission) continue;
-
     if(assignment.points_possible === 0) continue;
 
-    const percentage = submission.submission.score / assignment.points_possible
-    totalEarned += submission.submission.score
+    const isLate = new Date(submission.submission.submitted_at) > new Date(assignment.due_at)
+    let score = submission.submission.score;
+    if(isLate){
+      score -= 0.1 * assignment.points_possible;
+    }
+
+    const percentage = score / assignment.points_possible
+    totalEarned += score
     totalPossible += assignment.points_possible
 
     finalResult.assignments[assignment.id] = percentage;
@@ -149,9 +153,10 @@ function getLearnerData(course, assignmentGroup, submissions) {
       finalResult.avg = totalEarned / totalPossible
     }
   
-    
     results.push(finalResult);
   }
 
-  console.log("Learner Results:", results);
+  console.log(results);
+  return results;
 }
+
