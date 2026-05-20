@@ -97,7 +97,7 @@ const result = getLearnerData(CourseInfo, AssignmentGroup, LearnerSubmissions);
 /////////////////////////////////////////
 
 function getLearnerData(course, assignmentGroup, submissions) {
-  //Checks whether the assignment group belongs to the course
+  //Checks if the assignment group belongs to the course
   if (course.id !== assignmentGroup.course_id) {
     throw new Error(
       "Invalid input: assignment group does not belong to this course",
@@ -111,11 +111,11 @@ function getLearnerData(course, assignmentGroup, submissions) {
 
   const uniqueLearners = [];
 
-  for (let submission of submissions) {
-    if (!uniqueLearners.includes(submission.learner_id)) {
+  submissions.forEach((submission) => {
+    if (!uniqueLearners.includes(submission.learner_id)){
       uniqueLearners.push(submission.learner_id);
     }
-  }
+  });
 
   let results = [];
   for (let learnerId of uniqueLearners) {
@@ -140,17 +140,21 @@ function getLearnerData(course, assignmentGroup, submissions) {
       score -= 0.1 * assignment.points_possible;
     }
 
-    const percentage = score / assignment.points_possible
+    function calculatePercentage(score,points){
+      return score/points;
+    }
+
+    const percentage = calculatePercentage(score, assignment.points_possible);
     totalEarned += score
     totalPossible += assignment.points_possible
 
-    finalResult.assignments[assignment.id] = percentage;
+    finalResult.assignments[assignment.id] = percentage * 100;
     }
 
     if(totalPossible === 0){
       finalResult.avg = 0;
     } else {
-      finalResult.avg = totalEarned / totalPossible
+      finalResult.avg = (totalEarned / totalPossible) * 100;
     }
   
     results.push(finalResult);
