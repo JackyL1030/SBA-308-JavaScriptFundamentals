@@ -110,14 +110,24 @@ function getLearnerData(course, assignmentGroup, submissions) {
     return new Date(assignment.due_at) <= now;
   });
 
-  // Connecting submissions to assignments
-  dueAssignments.forEach((assignment) => {
-    const submission = submissions.find(
-      (s) => s.assignment_id === assignment.id,
-    );
-    if (!submission) return;
+    const uniqueLearners = [];
 
-    const percentage = submission.submission.score / assignment.points_possible;
-    console.log("Assignment:", assignment.id, "Percent:", percentage);
-  });
-}
+    for(submission of submissions){ 
+      if (!uniqueLearners.includes(submission.learner_id)){
+        uniqueLearners.push(submission.learner_id)
+      }
+    } 
+
+    let results = [];
+    for(learnerId of uniqueLearners){
+      let finalResult = {
+        id: learnerId,
+        avg: 0
+      };
+      results.push(finalResult);
+    }
+
+    console.log("Learner Results:", results)
+
+  };
+
