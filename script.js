@@ -97,7 +97,7 @@ const result = getLearnerData(CourseInfo, AssignmentGroup, LearnerSubmissions);
 /////////////////////////////////////////
 
 function getLearnerData(course, assignmentGroup, submissions) {
-  //Checks if the assignment group belongs to the course
+  try{
   if (course.id !== assignmentGroup.course_id) {
     throw new Error(
       "Invalid input: assignment group does not belong to this course",
@@ -148,13 +148,13 @@ function getLearnerData(course, assignmentGroup, submissions) {
     totalEarned += score
     totalPossible += assignment.points_possible
 
-    finalResult.assignments[assignment.id] = percentage * 100;
+    finalResult.assignments[assignment.id] = percentage;
     }
 
     if(totalPossible === 0){
       finalResult.avg = 0;
     } else {
-      finalResult.avg = (totalEarned / totalPossible) * 100;
+      finalResult.avg = (totalEarned / totalPossible);
     }
   
     results.push(finalResult);
@@ -162,5 +162,8 @@ function getLearnerData(course, assignmentGroup, submissions) {
 
   console.log(results);
   return results;
+  } catch (error){
+    console.log("Error processing:")
+    return [];
+  }
 }
-
